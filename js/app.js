@@ -201,11 +201,12 @@
   }
 
   // Chama o webhook do n8n e devolve true/false conforme o número existir no WhatsApp.
-  async function checkWhatsappExists(numero) {
+  // O webhook espera o número completo, com código do país (55).
+  async function checkWhatsappExists(numeroLocal) {
     const res = await fetch(cfg.WHATSAPP_CHECK_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ numero }),
+      body: JSON.stringify({ numero: "55" + numeroLocal }),
     });
     if (!res.ok) throw new Error("webhook respondeu " + res.status);
 
