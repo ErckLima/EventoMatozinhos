@@ -358,8 +358,19 @@
     showFormMessage("Presença confirmada! Nos vemos lá 🎉", "success");
     form.reset();
     fireConfetti();
+    notifyNewRegistration(`${toTitleCase(firstName)} ${toTitleCase(lastName)}`, validNumber);
     loadGuests();
   });
+
+  // Avisa o webhook do n8n que alguém se cadastrou. Falha aqui não deve
+  // impedir o cadastro, então erro só vai pro console.
+  function notifyNewRegistration(nome, numero) {
+    fetch(cfg.NEW_REGISTRATION_WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nome, numero }),
+    }).catch((err) => console.error("Erro ao avisar novo cadastro:", err));
+  }
 
   function showFormMessage(text, type) {
     formMessage.textContent = text;

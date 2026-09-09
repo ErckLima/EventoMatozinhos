@@ -18,6 +18,9 @@ window.APP_CONFIG = {
   // Webhook (n8n) que confirma se o número existe no WhatsApp antes de salvar
   WHATSAPP_CHECK_URL: "https://n8n.deverick.cloud/webhook/matozinhos",
 
+  // Webhook (n8n) avisado sempre que alguém confirma presença
+  NEW_REGISTRATION_WEBHOOK_URL: "https://n8n.deverick.cloud/webhook/avisoCadastro",
+
   // Data/hora do evento (ISO, com fuso de Brasília -03:00)
   EVENT_DATE_ISO: "2026-10-10T18:00:00-03:00",
 
