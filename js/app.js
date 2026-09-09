@@ -419,8 +419,8 @@
     const list = guests
       .map((g, i) => {
         const fullName = `${toTitleCase(g.first_name)} ${toTitleCase(g.last_name)}`;
-        const paidTag = g.paid ? "✅ PG - " : "";
-        return `${i + 1}. ${paidTag}${fullName}`;
+        const paidTag = g.paid ? " - PG ✅" : "";
+        return `${i + 1}. ${fullName}${paidTag}`;
       })
       .join("\n");
 
