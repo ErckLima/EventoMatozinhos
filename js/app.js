@@ -37,6 +37,9 @@
   const loginError = document.getElementById("loginError");
   const adminEmailLabel = document.getElementById("adminEmailLabel");
 
+  const copyListBtn = document.getElementById("copyListBtn");
+  const copyListMessage = document.getElementById("copyListMessage");
+
   // ---------- countdown ----------
   function startCountdown() {
     const target = new Date(cfg.EVENT_DATE_ISO).getTime();
@@ -156,7 +159,9 @@
 
       const name = document.createElement("span");
       name.className = "guest-name";
-      name.textContent = shortName(g.first_name, g.last_name);
+      // Admin vê o nome completo (precisa identificar quem pagou); no
+      // público o sobrenome fica abreviado.
+      name.textContent = isAdmin ? `${g.first_name} ${g.last_name}` : shortName(g.first_name, g.last_name);
       name.title = `${g.first_name} ${g.last_name}`;
       info.appendChild(name);
 
@@ -354,10 +359,13 @@
       adminLogged.classList.remove("hidden");
       adminEmailLabel.textContent = session.user.email;
       adminToggle.textContent = "🔓";
+      copyListBtn.classList.remove("hidden");
     } else {
       loginBox.classList.remove("hidden");
       adminLogged.classList.add("hidden");
       adminToggle.textContent = "🔒";
+      copyListBtn.classList.add("hidden");
+      copyListMessage.textContent = "";
     }
   }
 
@@ -383,6 +391,30 @@
     session = null;
     showAdminUI();
     loadGuests();
+  });
+
+  copyListBtn.addEventListener("click", async () => {
+    if (!session) return;
+
+    const list = guests
+      .map((g, i) => `${i + 1}. ${g.first_name} ${g.last_name} - ${formatPhoneDisplay(g.phone)}`)
+      .join("\n");
+
+    if (!list) {
+      copyListMessage.textContent = "Ainda não tem nenhum convidado cadastrado.";
+      copyListMessage.className = "form-message error";
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(list);
+      copyListMessage.textContent = `Lista com ${guests.length} convidado(s) copiada!`;
+      copyListMessage.className = "form-message success";
+    } catch (err) {
+      console.error("Erro ao copiar lista:", err);
+      copyListMessage.textContent = "Não deu pra copiar automaticamente. Copie manualmente:\n\n" + list;
+      copyListMessage.className = "form-message error";
+    }
   });
 
   async function togglePaid(id, paid) {

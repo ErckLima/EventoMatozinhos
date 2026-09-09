@@ -405,6 +405,14 @@ a { color: inherit; }
 
 .guests-count { color: var(--text-dim); font-size: 0.9rem; white-space: nowrap; }
 
+.btn-copy-list {
+  display: block;
+  width: 100%;
+  margin-bottom: 18px;
+  font-size: 0.9rem;
+  padding: 12px 20px;
+}
+
 .guest-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
