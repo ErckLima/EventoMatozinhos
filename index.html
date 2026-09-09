@@ -99,7 +99,10 @@
           </div>
           <div class="field">
             <label for="phone">Telefone (WhatsApp)</label>
-            <input id="phone" name="phone" type="tel" placeholder="(31) 90000-0000" required maxlength="20" />
+            <div class="phone-input-group">
+              <span class="phone-prefix">🇧🇷 +55</span>
+              <input id="phone" name="phone" type="tel" placeholder="31 90000-0000" required maxlength="16" />
+            </div>
           </div>
 
           <!-- honeypot anti-spam: campo escondido, humano não preenche -->

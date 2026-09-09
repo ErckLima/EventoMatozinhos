@@ -61,6 +61,18 @@
     setInterval(tick, 1000);
   }
 
+  // Telefone é sempre guardado como 55 + DDD + número. Formata só para exibição.
+  function formatPhoneDisplay(phone) {
+    const digits = (phone || "").replace(/\D/g, "");
+    if (!digits.startsWith("55") || (digits.length !== 12 && digits.length !== 13)) {
+      return phone;
+    }
+    const ddd = digits.slice(2, 4);
+    const rest = digits.slice(4);
+    const splitAt = rest.length - 4;
+    return `+55 (${ddd}) ${rest.slice(0, splitAt)}-${rest.slice(splitAt)}`;
+  }
+
   // ---------- data loading ----------
   async function loadGuests() {
     const isAdmin = !!session;
@@ -128,7 +140,7 @@
       if (isAdmin && g.phone) {
         const phone = document.createElement("span");
         phone.className = "guest-phone";
-        phone.textContent = g.phone;
+        phone.textContent = formatPhoneDisplay(g.phone);
         info.appendChild(phone);
       }
 
