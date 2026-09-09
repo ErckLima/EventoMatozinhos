@@ -39,12 +39,13 @@ create policy "qualquer_pessoa_pode_cadastrar"
   with check (true);
 
 -- 5. Só o organizador logado enxerga a tabela completa (com telefone)
+--    lower(...) dos dois lados evita bug bobo de maiúscula/minúscula no e-mail
 drop policy if exists "admin_pode_ver_tudo" on public.evento_matozinhos_convidados;
 create policy "admin_pode_ver_tudo"
   on public.evento_matozinhos_convidados
   for select
   to authenticated
-  using ( (auth.jwt() ->> 'email') = 'erickfalubay@gmail.com' );
+  using ( lower(auth.jwt() ->> 'email') = lower('erickfalubay@gmail.com') );
 
 -- 6. Só o organizador logado pode marcar pago / não pago
 drop policy if exists "admin_pode_atualizar" on public.evento_matozinhos_convidados;
@@ -52,8 +53,8 @@ create policy "admin_pode_atualizar"
   on public.evento_matozinhos_convidados
   for update
   to authenticated
-  using ( (auth.jwt() ->> 'email') = 'erickfalubay@gmail.com' )
-  with check ( (auth.jwt() ->> 'email') = 'erickfalubay@gmail.com' );
+  using ( lower(auth.jwt() ->> 'email') = lower('erickfalubay@gmail.com') )
+  with check ( lower(auth.jwt() ->> 'email') = lower('erickfalubay@gmail.com') );
 
 -- 7. Só o organizador logado pode excluir convidados
 drop policy if exists "admin_pode_excluir" on public.evento_matozinhos_convidados;
@@ -61,7 +62,7 @@ create policy "admin_pode_excluir"
   on public.evento_matozinhos_convidados
   for delete
   to authenticated
-  using ( (auth.jwt() ->> 'email') = 'erickfalubay@gmail.com' );
+  using ( lower(auth.jwt() ->> 'email') = lower('erickfalubay@gmail.com') );
 
 -- 8. Permissões de acesso (grants) — precisam existir além das policies acima
 grant usage on schema public to anon, authenticated;
@@ -71,4 +72,16 @@ grant select on public.evento_matozinhos_lista_publica to anon, authenticated;
 
 -- 9. Realtime — a lista do site atualiza sozinha quando alguém cadastra
 --    ou quando você marca pagamento, sem precisar dar F5.
-alter publication supabase_realtime add table public.evento_matozinhos_convidados;
+--    Bloco condicional pra não dar erro (e desfazer o resto do script) caso
+--    você rode esse arquivo de novo e a tabela já esteja na publicação.
+do $$
+begin
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime'
+      and schemaname = 'public'
+      and tablename = 'evento_matozinhos_convidados'
+  ) then
+    alter publication supabase_realtime add table public.evento_matozinhos_convidados;
+  end if;
+end $$;
