@@ -64,10 +64,29 @@
     setInterval(tick, 1000);
   }
 
+  // Normaliza "ERICK LIMA" / "erick lima" -> "Erick Lima" (preposições em minúsculo).
+  const NAME_LOWERCASE_WORDS = ["de", "da", "do", "dos", "das", "e"];
+  function toTitleCase(str) {
+    if (!str) return str;
+    return str
+      .trim()
+      .toLowerCase()
+      .split(/\s+/)
+      .map((word, i) => {
+        if (i > 0 && NAME_LOWERCASE_WORDS.includes(word)) return word;
+        return word
+          .split("-")
+          .map((part) => (part ? part.charAt(0).toUpperCase() + part.slice(1) : part))
+          .join("-");
+      })
+      .join(" ");
+  }
+
   // Mostra "Erick L" em vez do sobrenome inteiro na lista.
   function shortName(firstName, lastName) {
-    const initial = (lastName || "").trim().charAt(0).toUpperCase();
-    return initial ? `${firstName} ${initial}` : firstName;
+    const first = toTitleCase(firstName);
+    const initial = toTitleCase(lastName).charAt(0);
+    return initial ? `${first} ${initial}` : first;
   }
 
   const AVATAR_COLORS = ["#f5b942", "#ef7d4f", "#e6598f", "#3ecf8e", "#7c9cf5", "#c792ea"];
@@ -159,10 +178,11 @@
 
       const name = document.createElement("span");
       name.className = "guest-name";
+      const fullName = `${toTitleCase(g.first_name)} ${toTitleCase(g.last_name)}`;
       // Admin vê o nome completo (precisa identificar quem pagou); no
       // público o sobrenome fica abreviado.
-      name.textContent = isAdmin ? `${g.first_name} ${g.last_name}` : shortName(g.first_name, g.last_name);
-      name.title = `${g.first_name} ${g.last_name}`;
+      name.textContent = isAdmin ? fullName : shortName(g.first_name, g.last_name);
+      name.title = fullName;
       info.appendChild(name);
 
       if (isAdmin && g.phone) {
@@ -185,7 +205,7 @@
         const deleteBtn = document.createElement("button");
         deleteBtn.className = "icon-btn danger";
         deleteBtn.textContent = "Remover";
-        deleteBtn.addEventListener("click", () => deleteGuest(g.id, `${g.first_name} ${g.last_name}`));
+        deleteBtn.addEventListener("click", () => deleteGuest(g.id, fullName));
         actions.appendChild(deleteBtn);
 
         info.appendChild(actions);
@@ -304,8 +324,8 @@
 
     const fullPhone = "55" + validNumber;
     const { error } = await supabase.from(TABLE).insert({
-      first_name: firstName,
-      last_name: lastName,
+      first_name: toTitleCase(firstName),
+      last_name: toTitleCase(lastName),
       phone: fullPhone,
     });
 
@@ -397,7 +417,11 @@
     if (!session) return;
 
     const list = guests
-      .map((g, i) => `${i + 1}. ${g.first_name} ${g.last_name} - ${formatPhoneDisplay(g.phone)}`)
+      .map((g, i) => {
+        const fullName = `${toTitleCase(g.first_name)} ${toTitleCase(g.last_name)}`;
+        const paidTag = g.paid ? "✅ PG - " : "";
+        return `${i + 1}. ${paidTag}${fullName}`;
+      })
       .join("\n");
 
     if (!list) {
