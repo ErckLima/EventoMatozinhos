@@ -8,8 +8,8 @@
 
 window.APP_CONFIG = {
   // Painel do Supabase > Project Settings > API
-  SUPABASE_URL: "https://SEU-PROJETO.supabase.co",
-  SUPABASE_ANON_KEY: "SUA_ANON_KEY_AQUI",
+  SUPABASE_URL: "https://fsahjrulfwyhttnykjvb.supabase.co",
+  SUPABASE_ANON_KEY: "SUA_ANON_KEY_AQUI", // cole aqui a "anon public key" (não é segredo, pode expor)
 
   // Nomes usados no banco (ver supabase/schema.sql)
   TABLE_NAME: "evento_matozinhos_convidados",
