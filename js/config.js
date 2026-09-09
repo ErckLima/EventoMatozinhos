@@ -1,0 +1,24 @@
+// Configurações do site — edite os valores abaixo.
+//
+// IMPORTANTE sobre segurança: a "anon key" do Supabase é feita para ficar
+// pública no código do front-end (é assim que o Supabase funciona em sites
+// estáticos). Quem protege os dados de verdade são as regras de RLS
+// (Row Level Security) criadas em supabase/schema.sql — não a URL/chave
+// estarem "escondidas". NUNCA coloque aqui a "service_role key".
+
+window.APP_CONFIG = {
+  // Painel do Supabase > Project Settings > API
+  SUPABASE_URL: "https://SEU-PROJETO.supabase.co",
+  SUPABASE_ANON_KEY: "SUA_ANON_KEY_AQUI",
+
+  // Nomes usados no banco (ver supabase/schema.sql)
+  TABLE_NAME: "evento_matozinhos_convidados",
+  PUBLIC_VIEW_NAME: "evento_matozinhos_lista_publica",
+
+  // Data/hora do evento (ISO, com fuso de Brasília -03:00)
+  EVENT_DATE_ISO: "2026-10-10T18:00:00-03:00",
+
+  // Textos livres, edite à vontade
+  EVENT_NAME: "Reinauguração do Sítio",
+  EVENT_LOCATION: "Sítio da família · Matozinhos, MG",
+};
