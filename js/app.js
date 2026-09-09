@@ -161,6 +161,63 @@
     });
   }
 
+  // ---------- validação do telefone no WhatsApp ----------
+
+  // Normaliza o texto digitado em candidatos de número (DDD + número, sem
+  // código do país) para tentar automaticamente "com e sem o 9".
+  function buildPhoneCandidates(rawInput) {
+    let digits = rawInput.replace(/\D/g, "");
+
+    if ((digits.length === 12 || digits.length === 13) && digits.startsWith("55")) {
+      digits = digits.slice(2);
+    }
+    if (digits.length === 11 && digits.startsWith("0")) {
+      digits = digits.slice(1);
+    }
+
+    if (digits.length < 10 || digits.length > 11) {
+      return { error: "formato", candidates: [] };
+    }
+
+    const candidates = [digits];
+    if (digits.length === 11 && digits[2] === "9") {
+      candidates.push(digits.slice(0, 2) + digits.slice(3)); // tenta sem o 9
+    } else if (digits.length === 10) {
+      candidates.push(digits.slice(0, 2) + "9" + digits.slice(2)); // tenta com o 9
+    }
+    return { error: null, candidates };
+  }
+
+  // Chama o webhook do n8n e devolve true/false conforme o número existir no WhatsApp.
+  async function checkWhatsappExists(numero) {
+    const res = await fetch(cfg.WHATSAPP_CHECK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ numero }),
+    });
+    if (!res.ok) throw new Error("webhook respondeu " + res.status);
+
+    const json = await res.json();
+    const entry = Array.isArray(json) ? json[0] : json;
+    const item = entry && Array.isArray(entry.data) ? entry.data[0] : null;
+    return !!(item && item.exists);
+  }
+
+  // Tenta os candidatos em sequência; devolve o número validado ou null.
+  async function findValidWhatsappNumber(candidates) {
+    let hadNetworkError = false;
+    for (const candidate of candidates) {
+      try {
+        const exists = await checkWhatsappExists(candidate);
+        if (exists) return { number: candidate, hadNetworkError };
+      } catch (err) {
+        console.error("Erro ao verificar número no WhatsApp:", err);
+        hadNetworkError = true;
+      }
+    }
+    return { number: null, hadNetworkError };
+  }
+
   // ---------- register ----------
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -170,20 +227,43 @@
 
     const firstName = document.getElementById("firstName").value.trim();
     const lastName = document.getElementById("lastName").value.trim();
-    const phone = document.getElementById("phone").value.trim();
+    const phoneInput = document.getElementById("phone").value.trim();
 
-    if (!firstName || !lastName || !phone) {
+    if (!firstName || !lastName || !phoneInput) {
       showFormMessage("Preencha nome, sobrenome e telefone.", "error");
       return;
     }
 
+    const { error: formatError, candidates } = buildPhoneCandidates(phoneInput);
+    if (formatError) {
+      showFormMessage("Telefone incompleto. Inclua o DDD, ex: (31) 90000-0000.", "error");
+      return;
+    }
+
     submitBtn.disabled = true;
+    submitBtn.textContent = "Verificando número...";
+    showFormMessage("Confirmando seu número no WhatsApp...", "");
+
+    const { number: validNumber, hadNetworkError } = await findValidWhatsappNumber(candidates);
+
+    if (!validNumber) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Confirmar presença 🎊";
+      if (hadNetworkError) {
+        showFormMessage("Não conseguimos verificar seu número agora. Tente novamente em instantes.", "error");
+      } else {
+        showFormMessage("Não encontramos esse número no WhatsApp. Confira o DDD e tente com ou sem o 9.", "error");
+      }
+      return;
+    }
+
     submitBtn.textContent = "Enviando...";
 
+    const fullPhone = "55" + validNumber;
     const { error } = await supabase.from(TABLE).insert({
       first_name: firstName,
       last_name: lastName,
-      phone: phone,
+      phone: fullPhone,
     });
 
     submitBtn.disabled = false;
@@ -203,7 +283,7 @@
 
   function showFormMessage(text, type) {
     formMessage.textContent = text;
-    formMessage.className = "form-message " + type;
+    formMessage.className = "form-message " + (type || "");
   }
 
   function fireConfetti() {

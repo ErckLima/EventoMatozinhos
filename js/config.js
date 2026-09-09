@@ -15,6 +15,9 @@ window.APP_CONFIG = {
   TABLE_NAME: "evento_matozinhos_convidados",
   PUBLIC_VIEW_NAME: "evento_matozinhos_lista_publica",
 
+  // Webhook (n8n) que confirma se o número existe no WhatsApp antes de salvar
+  WHATSAPP_CHECK_URL: "https://n8n.deverick.cloud/webhook/matozinhos",
+
   // Data/hora do evento (ISO, com fuso de Brasília -03:00)
   EVENT_DATE_ISO: "2026-10-10T18:00:00-03:00",
 
