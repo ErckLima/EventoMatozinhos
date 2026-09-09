@@ -61,6 +61,19 @@
     setInterval(tick, 1000);
   }
 
+  // Mostra "Erick L" em vez do sobrenome inteiro na lista.
+  function shortName(firstName, lastName) {
+    const initial = (lastName || "").trim().charAt(0).toUpperCase();
+    return initial ? `${firstName} ${initial}` : firstName;
+  }
+
+  const AVATAR_COLORS = ["#f5b942", "#ef7d4f", "#e6598f", "#3ecf8e", "#7c9cf5", "#c792ea"];
+  function avatarColor(seed) {
+    let hash = 0;
+    for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
+    return AVATAR_COLORS[hash % AVATAR_COLORS.length];
+  }
+
   // Telefone é sempre guardado como 55 + DDD + número. Formata só para exibição.
   function formatPhoneDisplay(phone) {
     const digits = (phone || "").replace(/\D/g, "");
@@ -129,12 +142,22 @@
       const card = document.createElement("div");
       card.className = "guest-card";
 
+      const main = document.createElement("div");
+      main.className = "guest-main";
+
+      const avatar = document.createElement("div");
+      avatar.className = "guest-avatar";
+      avatar.style.background = avatarColor(g.first_name + g.last_name);
+      avatar.textContent = (g.first_name[0] || "?").toUpperCase();
+      main.appendChild(avatar);
+
       const info = document.createElement("div");
       info.className = "guest-info";
 
       const name = document.createElement("span");
       name.className = "guest-name";
-      name.textContent = `${g.first_name} ${g.last_name}`;
+      name.textContent = shortName(g.first_name, g.last_name);
+      name.title = `${g.first_name} ${g.last_name}`;
       info.appendChild(name);
 
       if (isAdmin && g.phone) {
@@ -163,11 +186,13 @@
         info.appendChild(actions);
       }
 
+      main.appendChild(info);
+
       const badge = document.createElement("span");
       badge.className = "badge " + (g.paid ? "paid" : "pending");
       badge.textContent = g.paid ? "✅ Pago" : "⏳ Pendente";
 
-      card.appendChild(info);
+      card.appendChild(main);
       card.appendChild(badge);
       guestListEl.appendChild(card);
     });
