@@ -302,6 +302,34 @@ a { color: inherit; }
 /* ---------- cadastro ---------- */
 .cadastro { position: relative; z-index: 1; padding: 20px 0 80px; }
 
+.pix-section { position: relative; z-index: 1; padding: 0 0 80px; }
+.pix-card { text-align: center; }
+
+.pix-key-box {
+  margin-top: 22px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  padding: 20px;
+}
+.pix-key-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--card-border);
+}
+.pix-key-row:last-of-type { border-bottom: none; }
+.pix-key-label { color: var(--text-dim); font-size: 0.9rem; }
+.pix-key-value {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--gold);
+  letter-spacing: 0.02em;
+}
+.pix-key-box .btn { margin-top: 16px; }
+
 .card {
   background: var(--card);
   border: 1px solid var(--card-border);

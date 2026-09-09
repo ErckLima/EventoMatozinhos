@@ -40,6 +40,23 @@
   const copyListBtn = document.getElementById("copyListBtn");
   const copyListMessage = document.getElementById("copyListMessage");
 
+  const copyPixBtn = document.getElementById("copyPixBtn");
+  const pixKeyValue = document.getElementById("pixKeyValue");
+  const pixCopyMessage = document.getElementById("pixCopyMessage");
+
+  copyPixBtn.addEventListener("click", async () => {
+    const key = pixKeyValue.textContent.trim();
+    try {
+      await navigator.clipboard.writeText(key);
+      pixCopyMessage.textContent = "Chave Pix copiada!";
+      pixCopyMessage.className = "form-message success";
+    } catch (err) {
+      console.error("Erro ao copiar chave Pix:", err);
+      pixCopyMessage.textContent = "Não deu pra copiar automaticamente. Chave: " + key;
+      pixCopyMessage.className = "form-message error";
+    }
+  });
+
   // ---------- countdown ----------
   function startCountdown() {
     const target = new Date(cfg.EVENT_DATE_ISO).getTime();
