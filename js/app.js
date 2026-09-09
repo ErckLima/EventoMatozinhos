@@ -351,7 +351,11 @@
 
     if (error) {
       console.error(error);
-      showFormMessage("Não deu pra confirmar agora. Tenta de novo em instantes.", "error");
+      if (error.code === "23505") {
+        showFormMessage("Esse número já tem uma presença confirmada. Cada telefone pode se cadastrar uma vez só.", "error");
+      } else {
+        showFormMessage("Não deu pra confirmar agora. Tenta de novo em instantes.", "error");
+      }
       return;
     }
 

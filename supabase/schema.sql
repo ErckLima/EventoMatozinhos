@@ -14,10 +14,17 @@ create table if not exists public.evento_matozinhos_convidados (
   id uuid primary key default gen_random_uuid(),
   first_name text not null check (char_length(trim(first_name)) > 0),
   last_name  text not null check (char_length(trim(last_name)) > 0),
-  phone      text not null check (char_length(trim(phone)) >= 8),
+  phone      text not null unique check (char_length(trim(phone)) >= 8),
   paid       boolean not null default false,
   created_at timestamptz not null default now()
 );
+
+-- 1.1. Garante 1 cadastro por telefone também numa tabela já existente
+--      (o "unique" acima só vale pra tabela criada do zero). Falha aqui
+--      avisa que já existe telefone duplicado na tabela — teria que
+--      resolver isso manualmente antes de continuar.
+create unique index if not exists evento_matozinhos_convidados_phone_key
+  on public.evento_matozinhos_convidados (phone);
 
 -- 2. View pública, SEM o telefone — é o que a lista pública do site usa.
 --    security_invoker = false faz a view usar o dono dela (não quem consulta),
